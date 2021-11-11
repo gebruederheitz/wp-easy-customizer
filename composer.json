@@ -1,0 +1,20 @@
+{
+    "name": "gebruederheitz/wp-easy-customizer",
+    "description": "A simplified, object-oriented interface for the Wordpress Customizer.",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "autoload": {
+        "psr-4": {
+            "Gebruederheitz\\Wordpress\\Customizer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andreas Maros",
+            "email": "andreas.maros@gebruederheitz.de"
+        }
+    ],
+    "require": {
+	    "php": "^7.3"
+    }
+}
