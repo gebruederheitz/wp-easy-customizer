@@ -236,3 +236,89 @@ class MyCustomizerSettings extends \Gebruederheitz\Wordpress\Customizer\Customiz
     }
 }
 ```
+
+
+### Using Custom Controls
+
+You can use custom controls if they extend the default `WP_Customize_Control`
+by passing the FQCN as the type for `CustomizerSetting`:
+
+```php
+class MyCustomizeControl extends WP_Customize_Control {
+    /* ... */
+}
+
+$customSetting = new CustomizerSetting(
+    $fieldId,
+    $label,
+    null
+    null,
+    MyCustomizeControl::class, 
+);
+```
+
+### Using the Separator field
+
+The separator custom field allows inserting static separations between settings
+in the shape of a `<hr>`.
+Optionally you can specify a label that will render an `<h2>` underneath the
+horizontal rule.
+
+```php
+use Gebruederheitz\Wordpress\Customizer\CustomControl\SeparatorCustomControl;
+
+$settings = [
+    // A plain horizontal rule with 2em vertical margin
+    new CustomizerSetting(
+        'some-unique-id-for-this-separator',
+        null,
+        null
+        null,
+        SeparatorCustomControl::class, 
+    ),
+    // With custom margin of 3em
+    new CustomizerSetting(
+        'sep-with-custom-margin',
+        null,
+        null
+        null,
+        SeparatorCustomControl::class,
+        [
+            'margin' => 3,
+        ]
+    ),
+    // with a heading in the default color #08d
+    new CustomizerSetting(
+        'sep-general-settings',
+        __('General Settings', 'namespace'),
+        null
+        null,
+        SeparatorCustomControl::class, 
+    ),
+    // with heading in a custom color
+    new CustomizerSetting(
+        'some-unique-id-for-this-separator',
+        null,
+        null
+        null,
+        SeparatorCustomControl::class, 
+        [
+            'color' => 'hotpink',
+        ]       
+    ),
+    // with heading in a custom color and custom margin
+    // hr bottom margin is calc(${customMargin}em + 2em) to compensate for
+    // the heading's margin collapsing
+    new CustomizerSetting(
+        'some-unique-id-for-this-separator',
+        null,
+        null
+        null,
+        SeparatorCustomControl::class, 
+        [
+            'color' => 'hotpink',
+            'margin' => 1,
+        ]       
+    ),
+];
+```

@@ -52,15 +52,17 @@ class CustomizerSettings
                     'type' => 'theme_mod'
                 ]);
 
+                $type = is_array($value) ? $value['type'] : 'text';
+                $controlComponentClass = class_exists($type) ? $type : WP_Customize_Control::class;
                 $wp_customize->add_control(
-                    new WP_Customize_Control(
+                    new $controlComponentClass(
                         $wp_customize,
                         $key . '_control',
                         [
                             'label' => __(is_array($value) ? $value['label'] : $value, 'ghwp'),
                             'section' => $section_key,
                             'settings' => $key,
-                            'type' => is_array($value) ? $value['type'] : 'text',
+                            'type' => $type,
                             'sanitize_callback' => is_array($value) ? $value['sanitize'] ?? null : null,
                             'choices' => is_array($value) ? $value['options'] ?? null : null,
                             'active_callback' => is_array($value) ? $value['active_callback'] ?? null : null,
