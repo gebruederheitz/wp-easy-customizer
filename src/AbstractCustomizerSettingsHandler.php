@@ -2,8 +2,8 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
-abstract class AbstractCustomizerSettingsHandler
-    implements CustomizerSettingsHandlerInterface
+abstract class AbstractCustomizerSettingsHandler implements
+    CustomizerSettingsHandlerInterface
 {
     protected $settingsSection = '';
 
@@ -14,14 +14,15 @@ abstract class AbstractCustomizerSettingsHandler
 
     public function onGetFields(array $fields): array
     {
-        foreach($this->getSettings() as $setting) {
+        foreach ($this->getSettings() as $setting) {
             $this->addSetting($fields, $setting);
         }
 
         return $fields;
     }
 
-    public function setSection(string $sectionSlug) {
+    public function setSection(string $sectionSlug)
+    {
         $this->settingsSection = $sectionSlug;
     }
 
@@ -29,6 +30,8 @@ abstract class AbstractCustomizerSettingsHandler
 
     protected function addSetting(array &$fields, CustomizerSetting $setting)
     {
-        $fields[$this->settingsSection]['content'][$setting->getMetaFieldName()] = $setting->getConfig();
+        $fields[$this->settingsSection]['content'][
+            $setting->getMetaFieldName()
+        ] = $setting->getConfig();
     }
 }

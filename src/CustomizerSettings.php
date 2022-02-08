@@ -27,47 +27,63 @@ class CustomizerSettings
         add_action('customize_register', [$this, 'onCustomizeRegister']);
     }
 
-    public function onCustomizeRegister(WP_Customize_Manager $wp_customize): void
-    {
+    public function onCustomizeRegister(
+        WP_Customize_Manager $wp_customize
+    ): void {
         $this->declutterCustomizer($wp_customize);
 
         $fields = $this->getFields();
 
-        $wp_customize->add_panel(static::$basePanelId, ['title' => $this->title]);
+        $wp_customize->add_panel(static::$basePanelId, [
+            'title' => $this->title,
+        ]);
 
         foreach ($fields as $section_key => $section_content) {
-            $wp_customize->add_section( $section_key, array(
-                'priority'       => 500,
+            $wp_customize->add_section($section_key, [
+                'priority' => 500,
                 'theme_supports' => '',
-                'title'          => __( $section_content['label'], 'ghwp' ),
-                'panel'          => static::$basePanelId,
-                'description'  => isset($section_content['description'])
+                'title' => __($section_content['label'], 'ghwp'),
+                'panel' => static::$basePanelId,
+                'description' => isset($section_content['description'])
                     ? __($section_content['description'], 'ghwp')
                     : '',
-            ) );
+            ]);
 
             foreach ($section_content['content'] as $key => $value) {
                 $wp_customize->add_setting($key, [
-                    'default' => is_array($value) ? $value['default'] ?? '' : '',
-                    'type' => 'theme_mod'
+                    'default' => is_array($value)
+                        ? $value['default'] ?? ''
+                        : '',
+                    'type' => 'theme_mod',
                 ]);
 
                 $type = is_array($value) ? $value['type'] : 'text';
-                $controlComponentClass = class_exists($type) ? $type : WP_Customize_Control::class;
+                $controlComponentClass = class_exists($type)
+                    ? $type
+                    : WP_Customize_Control::class;
                 $wp_customize->add_control(
                     new $controlComponentClass(
                         $wp_customize,
                         $key . '_control',
                         [
-                            'label' => __(is_array($value) ? $value['label'] : $value, 'ghwp'),
+                            'label' => __(
+                                is_array($value) ? $value['label'] : $value,
+                                'ghwp',
+                            ),
                             'section' => $section_key,
                             'settings' => $key,
                             'type' => $type,
-                            'sanitize_callback' => is_array($value) ? $value['sanitize'] ?? null : null,
-                            'choices' => is_array($value) ? $value['options'] ?? null : null,
-                            'active_callback' => is_array($value) ? $value['active_callback'] ?? null : null,
-                        ]
-                    )
+                            'sanitize_callback' => is_array($value)
+                                ? $value['sanitize'] ?? null
+                                : null,
+                            'choices' => is_array($value)
+                                ? $value['options'] ?? null
+                                : null,
+                            'active_callback' => is_array($value)
+                                ? $value['active_callback'] ?? null
+                                : null,
+                        ],
+                    ),
                 );
             }
         }
@@ -80,8 +96,11 @@ class CustomizerSettings
      *
      * @return mixed
      */
-    public static function getValue(string $key, $default = null, $sanitizer = null)
-    {
+    public static function getValue(
+        string $key,
+        $default = null,
+        $sanitizer = null
+    ) {
         $value = get_theme_mod($key, $default);
         if (isset($sanitizer)) {
             $value = call_user_func($sanitizer, $value);
@@ -101,10 +120,10 @@ class CustomizerSettings
 
     protected function declutterCustomizer(WP_Customize_Manager $wp_customize)
     {
-        $wp_customize->remove_panel( 'themes' );
-        $wp_customize->remove_section( 'static_front_page' );
-        $wp_customize->remove_section( 'custom_css' );
-        $wp_customize->remove_control( 'custom_logo' );
-        $wp_customize->remove_control( 'site_icon' );
+        $wp_customize->remove_panel('themes');
+        $wp_customize->remove_section('static_front_page');
+        $wp_customize->remove_section('custom_css');
+        $wp_customize->remove_control('custom_logo');
+        $wp_customize->remove_control('site_icon');
     }
 }

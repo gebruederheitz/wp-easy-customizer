@@ -28,28 +28,28 @@ class CustomizerSetting
     /**
      * CustomizerSetting constructor.
      *
-     * @param string $metaFieldName
-     * @param        $label
-     * @param        $default
-     * @param null   $sanitizer
-     * @param string $type
-     * @param null   $options
-     * @param null   $activeCallback
+     * @param string          $metaFieldName
+     * @param ?mixed          $label
+     * @param ?mixed          $default
+     * @param callable|string $sanitizer
+     * @param string          $type
+     * @param ?mixed          $options
+     * @param callable        $activeCallback
      */
     public function __construct(
         string $metaFieldName,
         $label,
         $default,
         $sanitizer = null,
-        $type = 'text',
+        string $type = 'text',
         $options = null,
         $activeCallback = null
     ) {
-        $this->label          = $label;
-        $this->type           = $type;
-        $this->sanitizer      = $sanitizer;
-        $this->default        = $default;
-        $this->options        = $options;
+        $this->label = $label;
+        $this->type = $type;
+        $this->sanitizer = $sanitizer;
+        $this->default = $default;
+        $this->options = $options;
         $this->activeCallback = $activeCallback;
         $this->metaFieldName = $metaFieldName;
     }

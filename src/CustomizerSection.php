@@ -27,7 +27,10 @@ class CustomizerSection
             $this->addSettingsHandlers($settingsHandlers);
         }
 
-        add_filter(CustomizerSettings::HOOK_GET_SECTIONS, [$this, 'onGetSections']);
+        add_filter(CustomizerSettings::HOOK_GET_SECTIONS, [
+            $this,
+            'onGetSections',
+        ]);
     }
 
     public function onGetSections(array $sections)
@@ -41,8 +44,9 @@ class CustomizerSection
         return $sections;
     }
 
-    public function addSettingsHandler(CustomizerSettingsHandlerInterface $handler)
-    {
+    public function addSettingsHandler(
+        CustomizerSettingsHandlerInterface $handler
+    ) {
         $handler->setSection($this->slug);
     }
 
