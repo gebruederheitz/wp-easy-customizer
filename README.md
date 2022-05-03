@@ -16,7 +16,7 @@ Make sure you have Composer autoload or an alternative class loader present.
 
 ## Usage
 
-For information on migrating from v1.x [see UPGRADING.md](https://github.com/gebruederheitz/wp-easy-customizer/UPGRADING.md)
+For information on migrating from v1.x [see UPGRADING.md](https://github.com/gebruederheitz/wp-easy-customizer/blob/main/UPGRADING.md)
 
 To start, you'll have to initialize the `CustomerSettings` object, optionally
 passing a label for the main panel. Then you can start adding sections to
@@ -223,6 +223,62 @@ class CompanyInformation extends AbstractCustomizerSettingsHandler
         return TelephoneNo::getValue();
     }
 }
+```
+
+Some of these examples can lead to a lot of repetition. A URL input is always
+going to have the type `url` and should ideally always have a sanitizer
+`sanitize_url`. For these cases, some specialized input classes are available
+at `Gebruederheitz\Wordpress\Customizer\InputTypes`:
+
+```php
+class MyCheckbox extends \Gebruederheitz\Wordpress\Customizer\InputTypes\CheckboxCustomizerSetting
+{
+    protected static $key = 'my-checkbox';
+    protected static $label = 'My Checkbox';
+    /* The values below are already set on CheckboxCustomizerSetting: */
+//    protected static $inputType = 'checkbox';
+//    protected static $default = false;
+}
+
+class MyUrlField extends \Gebruederheitz\Wordpress\Customizer\InputTypes\UrlCustomizerSetting
+{
+    protected static $key = 'my-url-field';
+    protected static $label = 'My URL';
+    /* Already set: */
+//    protected static $inputType = 'url';
+//    protected static $sanitizer = 'sanitize_url';
+}
+
+class MyTextField extends \Gebruederheitz\Wordpress\Customizer\InputTypes\TextCustomizerSetting
+{
+    protected static $key = 'my-text';
+    protected static $label = 'My Text';
+    /* Already set: */
+//    protected static $sanitizer = 'sanitize_text_field';
+}
+```
+
+
+### Labels / Translations / i18n
+
+All field labels, section names etc. are passed through WP's gettext `__()`.
+By default, the value `ghwp` is used as the second parameter, the translation
+namespace: 
+
+```php
+class SomeField extends BasicCustomizerSetting {
+    protected static $label = 'This is a label';
+}
+
+// Will result in
+$effectiveLabel = __('This is a label', 'ghwp');
+```
+
+You can set a custom namespace by passing a string as the second argument to
+the constructor of `CustomizerSettings`:
+
+```php
+new CustomizerSettings('Base Panel Title', 'my-custom-namespace');
 ```
 
 
