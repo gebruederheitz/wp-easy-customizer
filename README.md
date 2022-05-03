@@ -13,8 +13,14 @@ via composer:
 
 Make sure you have Composer autoload or an alternative class loader present.
 
+
 ## Usage
 
+For information on migrating from v1.x [see UPGRADING.md](https://github.com/gebruederheitz/wp-easy-customizer/UPGRADING.md)
+
+To start, you'll have to initialize the `CustomerSettings` object, optionally
+passing a label for the main panel. Then you can start adding sections to
+that main panel.
 
 ```php
 # functions.php (or controller class)
@@ -69,8 +75,24 @@ if (is_customize_preview()) {
 
 ```
 
-### Defining Settings Handlers
 
+### Defining Settings & Settings Handlers
+
+First off, you will have to define your settings. Each setting is a class 
+implementing `CustomizerSetting`. You can extend `BasicCustomizerSetting`
+for convenience:
+
+```php
+use \Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
+
+class TelephoneNo extends BasicCustomizerSetting 
+{
+    protected static $key = 'prefix_company_info_telephone';
+    protected static $label = 'Telephone No';
+}
+```
+
+Now you will have to implement a settings handler to register this setting.
 Settings handlers must implement `CustomizerSettingsHandlerInterface`. You can 
 extend `AbstractCustomizerSettingsHandler` for convenience:
 
@@ -79,140 +101,126 @@ use Gebruederheitz\Wordpress\Customizer\AbstractCustomizerSettingsHandler;
 
 class CompanyInformation extends AbstractCustomizerSettingsHandler
 {
-    /* Define DB indices where the settings are stored */
-    private static $telephoneNo = 'ghwp_company_info_telephone';
-    private static $streetAddress = 'ghwp_company_info_street_address';
-    private static $postalCode = 'ghwp_company_info_postal_code';
-    private static $addressCountry = 'ghwp_company_info_address_country';
-    private static $addressLocality = 'ghwp_company_info_address_locality';
-    
     /*
-     * Implement getSettings(), returning an array of CustomizerSetting objects
+     * Implement getSettings(), returning an array of CustomizerSetting implementations
      */
     protected function getSettings(): array
     {
-
         return [
-            new CustomizerSetting(
-                // field id
-                self::$telephoneNo,
-                // label
-                __('Telephone No', 'ghwp'),
-                // default (fallback) value
-                self::getDefault(self::$telephoneNo),
-                // sanitizer callback
-                'sanitize_text_field',
-            ),
-
-            new CustomizerSetting(
-                self::$streetAddress,
-                __('Street Address', 'ghwp'),
-                self::getDefault(self::$streetAddress),
-                'sanitize_text_field',
-            ),
-
-            new CustomizerSetting(
-                self::$postalCode,
-                __('Postal Code', 'ghwp'),
-                self::getDefault(self::$postalCode),
-                'sanitize_text_field',
-            ),
-
-            new CustomizerSetting(
-                self::$addressCountry,
-                __('Country', 'ghwp'),
-                self::getDefault(self::$addressCountry),
-                'sanitize_text_field',
-            ),
-
-            new CustomizerSetting(
-                self::$addressLocality,
-                __('Town / City', 'ghwp'),
-                self::getDefault(self::$addressLocality),
-                'sanitize_text_field',
-            ),
-            
-            new CustomizerSetting(
-                self::$showAddress,
-                __('Show address', 'ghwp'),
-                self::getDefault(self::$showAddress),
-                null,
-                // input type
-                'checkbox'
-            ),
-
-            new CustomizerSetting(
-                self::$exampleSelectField,
-                __('Support Icon', 'ghwp'),
-                self::getDefault(self::$exampleSelectField),
-                'sanitize_text_field',
-                // select input type with options
-                'select', 
-                [
-                    ExampleSelectValues::FIRST => 'Label for first option',
-                    ExampleSelectValues::SECOND => 'Label for the second option',
-                ]
-            ),
-            
-            new CustomizerSetting(
-                self::$contactPage,
-                __('Contact page', 'ghwp'),
-                self::getDefault(self::$contactPage),
-                null,
-                'dropdown-pages',
-                null,
-                // visibility callback (field is only visible if the function
-                // returns true
-                [self::class, 'isAddressShown']
-            ),
+            new TelephoneNo(),
         ];
     }
+}
+```
+
+This is the object you're going to pass to the `CustomizerSection`'s constructor,
+as shown above.
+
+
+### Settings
+
+You can do more with settings & handlers than the basic example above. Here are
+some more detailed usages:
+
+```php
+use Gebruederheitz\Wordpress\Customizer\AbstractCustomizerSettingsHandler;
+use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
+
+/**
+ * A setting with an alternative input type and explicit default value
+ */
+class ShowAddress extends BasicCustomizerSetting
+{
+    protected static $key = 'prefix_company_info_show_address';
+    protected static $label = 'Show address in footer';
+    // Optional: i18n namespace, defaults to 'ghwp'. This example results in the
+    // label `__('Show address in footer', 'i18n-namespace')`.
+    protected static $labelNamespace = 'i18n-namespace';
+    // Optional: default value, defaults to ''
+    protected static $default = false;
+    // Optional: input type
+    protected static $inputType = 'checkbox';
+}
+
+/**
+ * A setting with an alternative sanitizer
+ */
+class StreetAddress extends BasicCustomizerSetting
+{
+    protected static $key = 'prefix_company_info_street_address';
+    protected static $label = 'Street address';
+    protected static $sanitizer = 'sanitize_text_field';
+}
+
+/**
+ * A setting using a select field
+ */
+class SupportIcon extends BasicCustomizerSetting
+{
+    protected static $key = 'prefix_company_info_support_icon';
+    protected static $label = 'Support icon to use';
+    protected static $sanitizer = 'sanitize_text_field';
+    protected static $inputType = 'select';
     
-    /**
-     * OPTIONAL EXAMPLE
-     * 
-     * A static method used as a visibility callback
+    public function getOptions: ?array
+    {
+        return [
+            ExampleSelectValues::FIRST => 'Label for first option',
+            ExampleSelectValues::SECOND => 'Label for the second option',
+        ];
+    }
+
+/**
+ * A setting for selecting a page from the current site, which is only visible
+ * if the switch "ShowAddress" is active.
+ */
+class ContactPage extends BasicCustomizerSetting
+{
+    protected static $key = 'prefix_company_info_contact_page';
+    protected static $label = 'Contact page';
+    protected static $inputType = 'dropdown-pages';
+   
+    public function getActiveCallback() : ?callable
+    {
+        // Using an anonymous callback 
+        return function () {
+            return CustomizerSettings::getValue(
+                ShowAddress::getKey(),
+                ShowAddress::getDefault()
+            );
+        }
+        
+        // Using a class method
+        return [ShowAddress::class, 'getValue'] // getValue() has a default implementation in BasicCustomizerSetting
+    }
+}
+
+class CompanyInformation extends AbstractCustomizerSettingsHandler
+{
+    /*
+     * Implement getSettings(), returning an array of CustomizerSetting implementations
      */
-    public static function isAddressShown() {
-        return CustomizerSettings::getValue(
-            self::$showAddress,
-            self::getDefault(self::$showAddress)
-        );
+    protected function getSettings(): array
+    {
+        return [
+            new StreetAddress(),
+            new ShowAddress(),
+            new SupportIcon(),
+            new ContactPage(),
+        ];
     }
     
     /**
      * Use CustomizerSettings::getValue() to retrieve the stored setting.
      * Defining a public, static accessor method like this serves to encapsulate
-     * all the logic surrounding the setting inside a handler class. 
+     * all the logic surrounding the setting inside a handler class.
+     *
+     * This is the same implementation as in BasicCustomizerSetting::getValue(),
+     * so you could also simply use TelephoneNo::getValue() in your templates. 
      */
     public static function getTelephoneNo(): string
     {
-        return CustomizerSettings::getValue(
-            self::$telephoneNo,
-            self::getDefault(self::$telephoneNo)
-        );
-    }
-    
-    /**
-     * OPTIONAL EXAMPLE
-     * 
-     * One possible way to store default values for each individual setting.
-     */
-    private static function getDefault($key)
-    {
-        switch ($key) {
-            case self::$telephoneNo:
-            case self::$streetAddress:
-            case self::$postalCode:
-            case self::$addressLocality:
-                return '';
-            case self::$addressCountry:
-                return 'DE';
-            case self::$showAddress:
-                return true;
-            default:
-                return null;
-        }
+        return TelephoneNo::getValue();
     }
 }
 ```
@@ -220,8 +228,10 @@ class CompanyInformation extends AbstractCustomizerSettingsHandler
 
 ### Customizing which panels are removed
 
-You can extend the `CustomizerSettings` class and override the `declutterCustomizer()`
-method to control, which of the default panels are removed:
+By default, `CustomizerSettings` "cleans up" the Customizer, removing some
+panels that are rarely used. You can extend the `CustomizerSettings` class and 
+override the `declutterCustomizer()` method to control which of the default 
+panels are removed:
 
 ```php
 class MyCustomizerSettings extends \Gebruederheitz\Wordpress\Customizer\CustomizerSettings
@@ -241,20 +251,19 @@ class MyCustomizerSettings extends \Gebruederheitz\Wordpress\Customizer\Customiz
 ### Using Custom Controls
 
 You can use custom controls if they extend the default `WP_Customize_Control`
-by passing the FQCN as the type for `CustomizerSetting`:
+by returning the FQCN from `CustomizerSetting::getInputType()`:
 
 ```php
 class MyCustomizeControl extends WP_Customize_Control {
     /* ... */
 }
 
-$customSetting = new CustomizerSetting(
-    $fieldId,
-    $label,
-    null
-    null,
-    MyCustomizeControl::class, 
-);
+class MyCustomSetting implements CustomizerSetting
+{
+    /* ... */
+    
+    protected static $inputType = MyCustomizeControl::class;
+}
 ```
 
 ### Using the Separator field
@@ -262,46 +271,32 @@ $customSetting = new CustomizerSetting(
 The separator custom field allows inserting static separations between settings
 in the shape of a `<hr>`.
 Optionally you can specify a label that will render an `<h2>` underneath the
-horizontal rule.
+horizontal rule. The easiest way is to use the `SeparatorSetting` class:
 
 ```php
-use Gebruederheitz\Wordpress\Customizer\CustomControl\SeparatorCustomControl;
+use Gebruederheitz\Wordpress\Customizer\InputTypes\SeparatorSetting;
 
 $settings = [
     // A plain horizontal rule with 2em vertical margin
-    new CustomizerSetting(
-        'some-unique-id-for-this-separator',
-        null,
-        null
-        null,
-        SeparatorCustomControl::class, 
-    ),
+    new SeparatorSetting('some-unique-id-for-this-separator'),
+    new TelephoneNo(),
     // With custom margin of 3em
-    new CustomizerSetting(
+    new SeparatorSetting(
         'sep-with-custom-margin',
         null,
-        null
-        null,
-        SeparatorCustomControl::class,
         [
             'margin' => 3,
         ]
     ),
     // with a heading in the default color #08d
-    new CustomizerSetting(
+    new SeparatorSetting(
         'sep-general-settings',
-        __('General Settings', 'namespace'),
-        null
-        null,
-        SeparatorCustomControl::class, 
+        __('General Settings', 'namespace')
     ),
     // with heading in a custom color
-    new CustomizerSetting(
+    new SeparatorSetting(
         'some-unique-id-for-this-separator',
-        null,
-        null
-        null,
-        SeparatorCustomControl::class, 
+        'Heading',
         [
             'color' => 'hotpink',
         ]       
@@ -309,12 +304,9 @@ $settings = [
     // with heading in a custom color and custom margin
     // hr bottom margin is calc(${customMargin}em + 2em) to compensate for
     // the heading's margin collapsing
-    new CustomizerSetting(
+    new SeparatorSetting(
         'some-unique-id-for-this-separator',
-        null,
-        null
-        null,
-        SeparatorCustomControl::class, 
+        'Heading'
         [
             'color' => 'hotpink',
             'margin' => 1,

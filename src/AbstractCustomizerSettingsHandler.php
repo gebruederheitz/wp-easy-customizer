@@ -26,12 +26,13 @@ abstract class AbstractCustomizerSettingsHandler implements
         $this->settingsSection = $sectionSlug;
     }
 
+    /** @return array<CustomizerSetting> */
     abstract protected function getSettings(): array;
 
     protected function addSetting(array &$fields, CustomizerSetting $setting)
     {
         $fields[$this->settingsSection]['content'][
-            $setting->getMetaFieldName()
+            $setting->getKey()
         ] = $setting->getConfig();
     }
 }
