@@ -31,9 +31,14 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
         return __(static::$label, static::$labelNamespace);
     }
 
-    public function getDefault()
+    public static function _getDefault()
     {
         return static::$default;
+    }
+
+    public function getDefault()
+    {
+        return static::_getDefault();
     }
 
     public function getInputType(): ?string
@@ -78,6 +83,9 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
 
     public static function getValue()
     {
-        return CustomizerSettings::getValue(static::$key, static::$default);
+        return CustomizerSettings::getValue(
+            static::$key,
+            static::_getDefault(),
+        );
     }
 }
