@@ -31,7 +31,7 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
         return __(static::$label, static::$labelNamespace);
     }
 
-    public static function _getDefault()
+    protected static function _getDefault()
     {
         return static::$default;
     }
