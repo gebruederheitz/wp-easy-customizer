@@ -58,9 +58,9 @@ class CustomizerSettings
     }
 
     /**
-     * @param string               $key
-     * @param null                 $default
-     * @param string|callable|null $sanitizer
+     * @param string                $key
+     * @param null|string|int|mixed $default
+     * @param string|callable|null  $sanitizer
      *
      * @return mixed
      */
