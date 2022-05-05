@@ -11,7 +11,7 @@ prettier:
 	@cd util/ \
 		&& . $$NVM_DIR/nvm.sh && nvm use \
 		&& npm i \
-		&& npx prettier -w --config .prettierrc ../src
+		&& npx prettier -w --config ../.prettierrc ../src
 
 # Create a tagged release to publish a new version of the package
 release:  lint
