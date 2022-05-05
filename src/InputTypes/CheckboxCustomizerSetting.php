@@ -8,6 +8,6 @@ use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
 class CheckboxCustomizerSetting extends BasicCustomizerSetting
 {
-    protected static $inputType = 'checkbox';
+    protected static $inputType = InputType::CHECKBOX;
     protected static $default = false;
 }

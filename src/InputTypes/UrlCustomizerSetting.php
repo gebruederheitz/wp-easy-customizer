@@ -8,6 +8,6 @@ use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
 class UrlCustomizerSetting extends BasicCustomizerSetting
 {
-    protected static $inputType = 'url';
+    protected static $inputType = InputType::URL;
     protected static $sanitizer = 'sanitize_url';
 }
