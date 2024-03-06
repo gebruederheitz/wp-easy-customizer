@@ -2,8 +2,6 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
-use Gebruederheitz\SimpleSingleton\SingletonAble;
-
 /**
  * @template ValueType
  * @implements CustomizerSetting<ValueType>
