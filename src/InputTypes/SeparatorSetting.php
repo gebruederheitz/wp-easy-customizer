@@ -6,12 +6,18 @@ namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 
 use Gebruederheitz\Wordpress\Customizer\CommonCustomizerSetting;
 use Gebruederheitz\Wordpress\Customizer\CustomControl\SeparatorCustomControl;
+use Gebruederheitz\Wordpress\Customizer\CustomizerSetting;
 
 /**
  * @extends CommonCustomizerSetting<null>
  */
-abstract class SeparatorSetting extends CommonCustomizerSetting
+class SeparatorSetting extends CommonCustomizerSetting
 {
+    public static function get(): CustomizerSetting
+    {
+        return new static(hash('sha256', (string) time()));
+    }
+
     /**
      * @param ?array<string, mixed> $options
      */
