@@ -194,8 +194,14 @@ class CustomizerPanel
             $section->onGetFields($fields);
         }
 
-        $fields = apply_filters(static::HOOK_GET_SECTIONS, $fields);
-        $fields = apply_filters(static::HOOK_GET_FIELDS, $fields);
+        $fields = apply_filters(
+            static::HOOK_GET_SECTIONS . $this->panelId,
+            $fields,
+        );
+        $fields = apply_filters(
+            static::HOOK_GET_FIELDS . $this->panelId,
+            $fields,
+        );
 
         return $fields;
     }
