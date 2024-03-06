@@ -179,9 +179,9 @@ new CustomizerSection($slug, $label, $description, [
 
 If you have customized the decluttering functionality as previously described in
 the docs, there is now a simpler and slightly more versatile alternative
-[as described in the documentation](https://github.com/gebruederheitz/wp-easy-customizer/blob/main/README.md#customizing-which-panels-are-removed).
-
-The old will, however, continue to work.
+[as described in the documentation](https://github.com/gebruederheitz/wp-easy-customizer/blob/main/README.md#customizing-which-panels-are-removed). The previous method will fail to work
+because `CustomizerSettings` is now a singleton instantiated by any panel object
+and thus can not be usefully extended.
 
 
 ### i18n namespaces are gone
@@ -194,7 +194,7 @@ yourself – that way the gettext parser will know which strings to add to which
 namespace when creating translations.
 
 
-### SeparatorSetting parameters need to provided differently
+### SeparatorSetting parameters need to be provided differently
 
 As the `SeparatorSetting` is also a `BasicCustomizerSetting` and therefore is a
 singleton with only a protected constructor, you will need to pass its 

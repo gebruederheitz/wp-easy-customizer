@@ -5,7 +5,7 @@ namespace Gebruederheitz\Wordpress\Customizer;
 use Gebruederheitz\SimpleSingleton\Singleton;
 use WP_Customize_Manager;
 
-class CustomizerSettings extends Singleton
+final class CustomizerSettings extends Singleton
 {
     public const HOOK_FILTER_DECLUTTER_ITEMS = 'ghwp_customizer_filter_declutter_items';
 
