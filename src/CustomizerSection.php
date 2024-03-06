@@ -2,19 +2,41 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
+/**
+ * @phpstan-import-type ValueType from CustomizerSetting
+ * @phpstan-type Sections array<string, array<string, mixed>>
+ */
 class CustomizerSection
 {
-    private $slug = '';
+    private string $slug = '';
 
-    private $label = '';
+    private string $label = '';
 
-    private $description = '';
+    private string $description = '';
 
-    public function __construct(
+    /** @var array<CustomizerSetting<ValueType>> $settings */
+    private array $settings = [];
+
+    /**
+     * @param ?array<CustomizerSetting<ValueType>> $settings
+     */
+    public static function factory(
         string $slug,
         string $label,
         string $description = null,
-        array $settingsHandlers = null
+        array $settings = null
+    ): CustomizerSection {
+        return new static($slug, $label, $description, $settings);
+    }
+
+    /**
+     * @param ?array<CustomizerSetting<ValueType>> $settings
+     */
+    final public function __construct(
+        string $slug,
+        string $label,
+        string $description = null,
+        array $settings = null
     ) {
         $this->slug = $slug;
         $this->label = $label;
@@ -23,17 +45,43 @@ class CustomizerSection
             $this->description = $description;
         }
 
-        if (is_array($settingsHandlers)) {
-            $this->addSettingsHandlers($settingsHandlers);
+        if (is_array($settings)) {
+            $this->addSettings(...$settings);
         }
-
-        add_filter(CustomizerSettings::HOOK_GET_SECTIONS, [
-            $this,
-            'onGetSections',
-        ]);
     }
 
-    public function onGetSections(array $sections)
+    /**
+     * @param CustomizerPanel|string $panel
+     */
+    public function setPanel($panel): self
+    {
+        $panelId = null;
+        if (is_string($panel)) {
+            $panelId = $panel;
+        } elseif (is_a($panel, CustomizerPanel::class, false)) {
+            $panelId = $panel->getId();
+        }
+
+        if ($panelId) {
+            add_filter(CustomizerPanel::HOOK_GET_SECTIONS . $panelId, [
+                $this,
+                'onGetSections',
+            ]);
+
+            add_filter(CustomizerPanel::HOOK_GET_FIELDS . $panelId, [
+                $this,
+                'onGetFields',
+            ]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Sections $sections
+     * @return Sections
+     */
+    public function onGetSections(array $sections): array
     {
         $sections[$this->slug] = [
             'label' => $this->label,
@@ -44,19 +92,36 @@ class CustomizerSection
         return $sections;
     }
 
-    public function addSettingsHandler(
-        CustomizerSettingsHandlerInterface $handler
-    ) {
-        $handler->setSection($this->slug);
+    /**
+     * @param Sections $sections
+     * @return Sections
+     */
+    public function onGetFields(array $sections): array
+    {
+        $this->registerSettings($sections);
+
+        return $sections;
     }
 
     /**
-     * @param CustomizerSettingsHandlerInterface[] $handlers
+     * @param CustomizerSetting<ValueType> ...$settings
      */
-    public function addSettingsHandlers(array $handlers)
+    public function addSettings(CustomizerSetting ...$settings): self
     {
-        foreach ($handlers as $handler) {
-            $this->addSettingsHandler($handler);
+        array_push($this->settings, ...$settings);
+
+        return $this;
+    }
+
+    /**
+     * @param Sections $fields
+     */
+    public function registerSettings(array &$fields): void
+    {
+        foreach ($this->settings as $setting) {
+            $fields[$this->slug]['content'][
+                $setting->getKey()
+            ] = $setting->getConfig();
         }
     }
 }

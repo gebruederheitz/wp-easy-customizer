@@ -7,49 +7,59 @@ namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 use Gebruederheitz\Wordpress\Customizer\CustomControl\SeparatorCustomControl;
 
-class SeparatorSetting extends BasicCustomizerSetting
+/**
+ * @extends BasicCustomizerSetting<null>
+ */
+abstract class SeparatorSetting extends BasicCustomizerSetting
 {
-    public static $key = 'not-really-the-key';
-    protected $dynamicKey;
-    /** @var null|array */
-    protected $dynamicOptions = null;
-    /** @var null|string */
-    protected $dynamicLabel = null;
-    protected static $default = null;
-    protected static $inputType = SeparatorCustomControl::class;
+    public string $key;
 
-    public function __construct(
+    /** @var ?array<string, mixed>  */
+    protected ?array $options = null;
+
+    protected ?string $label = null;
+
+    protected $default = null;
+
+    protected ?string $inputType = SeparatorCustomControl::class;
+
+    /**
+     * @param ?array<string, mixed> $options
+     */
+    public function configure(
         string $key,
         ?string $label = null,
         ?array $options = null
-    ) {
-        $this->dynamicKey = $key;
+    ): self {
+        $this->key = $key;
 
         if ($label !== null) {
-            $this->dynamicLabel = $label;
+            $this->label = $label;
         }
 
         if ($options !== null) {
-            $this->dynamicOptions = $options;
+            $this->options = $options;
         }
+
+        return $this;
     }
 
     public function getKey(): string
     {
-        return $this->dynamicKey;
+        return $this->key;
     }
 
     public function getLabel(): string
     {
-        return $this->dynamicLabel ?: '';
+        return $this->label ?: '';
     }
 
     public function getOptions(): ?array
     {
-        return $this->dynamicOptions ?: null;
+        return $this->options ?: null;
     }
 
-    public static function getValue()
+    public function getValue()
     {
         return null;
     }

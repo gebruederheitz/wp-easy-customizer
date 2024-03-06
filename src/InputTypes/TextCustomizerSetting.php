@@ -6,7 +6,10 @@ namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 
 use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
-class TextCustomizerSetting extends BasicCustomizerSetting
+/**
+ * @extends BasicCustomizerSetting<string>
+ */
+abstract class TextCustomizerSetting extends BasicCustomizerSetting
 {
-    protected static $sanitizer = 'sanitize_text_field';
+    protected ?string $sanitizer = 'sanitize_text_field';
 }

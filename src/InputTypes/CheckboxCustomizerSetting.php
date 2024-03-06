@@ -6,8 +6,12 @@ namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 
 use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
-class CheckboxCustomizerSetting extends BasicCustomizerSetting
+/**
+ * @extends BasicCustomizerSetting<bool>
+ */
+abstract class CheckboxCustomizerSetting extends BasicCustomizerSetting
 {
-    protected static $inputType = InputType::CHECKBOX;
-    protected static $default = false;
+    protected ?string $inputType = InputType::CHECKBOX;
+    protected $default = false;
+    protected ?string $sanitizer = 'rest_sanitize_boolean';
 }

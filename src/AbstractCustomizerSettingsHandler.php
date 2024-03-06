@@ -2,37 +2,13 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
-abstract class AbstractCustomizerSettingsHandler implements
-    CustomizerSettingsHandlerInterface
+/**
+ * @deprecated Please read the upgrade guide: You can still use this for
+ *             semantic purposes, but all functionality surrounding this class
+ *             has been removed.
+ */
+abstract class AbstractCustomizerSettingsHandler
 {
-    protected $settingsSection = '';
-
-    public function __construct()
-    {
-        add_filter(CustomizerSettings::HOOK_GET_FIELDS, [$this, 'onGetFields']);
-    }
-
-    public function onGetFields(array $fields): array
-    {
-        foreach ($this->getSettings() as $setting) {
-            $this->addSetting($fields, $setting);
-        }
-
-        return $fields;
-    }
-
-    public function setSection(string $sectionSlug)
-    {
-        $this->settingsSection = $sectionSlug;
-    }
-
-    /** @return array<CustomizerSetting> */
+    /** @return array<CustomizerSetting<mixed>> */
     abstract protected function getSettings(): array;
-
-    protected function addSetting(array &$fields, CustomizerSetting $setting)
-    {
-        $fields[$this->settingsSection]['content'][
-            $setting->getKey()
-        ] = $setting->getConfig();
-    }
 }

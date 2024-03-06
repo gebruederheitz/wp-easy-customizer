@@ -6,8 +6,11 @@ namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 
 use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
-class UrlCustomizerSetting extends BasicCustomizerSetting
+/**
+ * @extends BasicCustomizerSetting<string>
+ */
+abstract class UrlCustomizerSetting extends BasicCustomizerSetting
 {
-    protected static $inputType = InputType::URL;
-    protected static $sanitizer = 'sanitize_url';
+    protected ?string $inputType = InputType::URL;
+    protected ?string $sanitizer = 'sanitize_url';
 }

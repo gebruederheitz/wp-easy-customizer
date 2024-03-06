@@ -2,55 +2,54 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
+use Gebruederheitz\SimpleSingleton\SingletonAble;
+
+/**
+ * @template ValueType
+ * @implements CustomizerSetting<ValueType>
+ */
 abstract class BasicCustomizerSetting implements CustomizerSetting
 {
-    /** @var string */
-    protected static $key;
+    use SingletonAble;
 
-    /** @var string */
-    protected static $label;
-
-    /** @var string */
-    protected static $labelNamespace = 'ghwp';
-
-    protected static $default = '';
-
-    /** @var null|string */
-    protected static $inputType = null;
-
-    /** @var null|string */
-    protected static $sanitizer = null;
-
-    public function getKey(): string
+    public static function get(): self
     {
-        return static::$key;
+        return self::getInstance();
     }
 
-    public function getLabel(): string
-    {
-        return __(static::$label, static::$labelNamespace);
-    }
+    /** @var ValueType */
+    protected $default = '';
 
-    protected static function _getDefault()
-    {
-        return static::$default;
-    }
+    protected ?string $inputType = null;
 
+    /** @var ?callable-string  */
+    protected ?string $sanitizer = null;
+
+    abstract public function getKey(): string;
+
+    abstract public function getLabel(): string;
+
+    /**
+     * @return ValueType
+     */
     public function getDefault()
     {
-        return static::_getDefault();
+        return $this->default;
     }
 
     public function getInputType(): ?string
     {
-        return static::$inputType;
+        return $this->inputType;
     }
 
     public function getSanitizer(): ?callable
     {
-        return static::$sanitizer;
+        return $this->sanitizer;
     }
 
+    /**
+     * @return ?array<string, string>
+     */
     public function getOptions(): ?array
     {
         return null;
@@ -61,6 +60,9 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
         return null;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfig(): array
     {
         $result = [
@@ -68,7 +70,8 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
             'type' => $this->getInputType(),
             'default' => $this->getDefault(),
         ];
-        if (static::$sanitizer !== null) {
+
+        if ($this->getSanitizer() !== null) {
             $result['sanitize'] = $this->getSanitizer();
         }
         if ($this->getActiveCallback() !== null) {
@@ -81,11 +84,15 @@ abstract class BasicCustomizerSetting implements CustomizerSetting
         return $result;
     }
 
-    public static function getValue()
+    /**
+     * @return ValueType
+     */
+    public function getValue()
     {
         return CustomizerSettings::getValue(
-            static::$key,
-            static::_getDefault(),
+            $this->getKey(),
+            $this->getDefault(),
+            $this->getSanitizer(),
         );
     }
 }
