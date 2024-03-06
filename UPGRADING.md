@@ -56,7 +56,8 @@ has been removed. Setting are now added directly to sections.
 
 You may continue to use `AbstractCustomizerSettingsHandler` for semantic 
 purposes (logically grouping settings, providing value getters), but it has been
-marked deprecated and the interface has been removed.
+marked deprecated and the interface has been removed. Note however, that the 
+visibility of `getSettings()` needs to change to public for this to be useful.
 
 ```php
 // Before

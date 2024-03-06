@@ -10,5 +10,5 @@ namespace Gebruederheitz\Wordpress\Customizer;
 abstract class AbstractCustomizerSettingsHandler
 {
     /** @return array<CustomizerSetting<mixed>> */
-    abstract protected function getSettings(): array;
+    abstract public function getSettings(): array;
 }
