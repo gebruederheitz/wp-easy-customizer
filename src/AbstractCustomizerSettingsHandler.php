@@ -18,6 +18,11 @@ abstract class AbstractCustomizerSettingsHandler
 
     final public function __construct()
     {
+        $this->init();
+    }
+
+    protected function init(): void
+    {
     }
 
     /** @return array<CustomizerSetting<mixed>> */
