@@ -192,6 +192,8 @@ $section->addSettings(TelephoneNo::get(), OtherSetting::get());
 use My\TelephoneNo;
 
 $phoneNumber = TelephoneNo::get()->getValue();
+// or you can use our little shortcut with any BasicCustomizerSetting:
+$phoneNumber = TelephoneNo::value();
 ```
 
 

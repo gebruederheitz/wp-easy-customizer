@@ -18,4 +18,12 @@ abstract class BasicCustomizerSetting extends CommonCustomizerSetting implements
     {
         return self::getInstance();
     }
+
+    /**
+     * @return ValueType
+     */
+    public static function value()
+    {
+        return self::getInstance()->getValue();
+    }
 }
