@@ -16,130 +16,214 @@ Make sure you have Composer autoload or an alternative class loader present.
 
 ## Usage
 
-For information on migrating from v1.x [see UPGRADING.md](https://github.com/gebruederheitz/wp-easy-customizer/blob/main/UPGRADING.md)
+For information on migrating from v1.x or v2.x [see UPGRADING.md](https://github.com/gebruederheitz/wp-easy-customizer/blob/main/UPGRADING.md)
 
-To start, you'll have to initialize the `CustomerSettings` object, optionally
-passing a label for the main panel. Then you can start adding sections to
-that main panel.
+You will need at least one `CustomizerPanel` object to start with, optionally
+passing a label (which defaults to "Theme Settings"). Then you can start adding 
+sections to your new panel.
 
 ```php
 # functions.php (or controller class)
-use Gebruederheitz\Wordpress\Customizer\CustomizerSettings;
-use Gebruederheitz\Wordpress\Customizer\CustomizerSection;
+use Gebruederheitz\Wordpress\Customizer\CustomizerPanel;
 
 // If your settings handler implement their getters as static methods, you will
 // only need to instantiate the whole bunch on the customizer page:
 if (is_customize_preview()) {
     // Set up a new customizer panel with the title 'My Settings'
     // It will also 'clean up' the Customizer by removing some panels (see below)
-    new CustomizerSettings('My Settings');
-    
-    // Create a "section", i.e. a sub-panel / menu entry containing individual
-    // settings
-    new CustomizerSection(
-        // A unique ID for the section
-        'ghwp_general_settings',
-        // The title of the section / panel
-        'General Settings',
-        // An optional description shown on the top of the open panel
-        null,
-        // Some settings handlers, more information below
-        [
-            new CompanyInformation(),
-        ]
-    );
+    // The ID is automatically prefixed with 'ghwp_customizer_panel_'.
+    $panel = new CustomizerPanel('my_main_panel', 'My Settings');
+```
 
+### Adding Sections to a panel
+
+A section is sub-panel or sub-menu which contains the actual settings. There are 
+three basic ways to add sections to a panel. Which one you use is mostly a 
+matter of taste and code organisation. The main difference is that sections
+added via the filter hook (variants (a) & (c), using `$panel->addNewSection()` or
+`$section->setPanel()`) are added to the rendered panel _after_ the ones 
+directly added (variant (b), using `$panel->addSections()`). So if you require
+a specific order of sections, you'll need to make certain these are registered
+through the same mechanism.
+
+#### (a) Directly from the panel using the automatic filter hook
+
+```php
+use Gebruederheitz\Wordpress\Customizer\CustomizerPanel;
+
+$panel = new CustomizerPanel('my_main_panel')
+$panel->addNewSection(
+    // A unique ID for the section
+    'my_general_settings',
+    // The title of the section / panel
+    'General Settings',
+    // An optional description shown on the top of the open panel
+    null,
+    // Some settings, more information below
+    [
+        CompanyInformation::get(),
+    ]
+)->addNewSection(/* This method can be chained */);
+```
+
+This allows for a very compact Customizer setup and is particularly useful if 
+you only have a handful of fairly standard settings. The disadvantage is that 
+you can not use any custom section classes, as `addNewSection()` will always
+instantiate a new vanilla `CustomizerSection`. And since we don't actually 
+receive the created section object, we have to add all settings right away.
+
+
+#### (b) Instance for instance - directly with objects
+
+```php
+use Gebruederheitz\Wordpress\Customizer\CustomizerPanel;
+use Gebruederheitz\Wordpress\Customizer\CustomizerSection;
+
+$panel = new CustomizerPanel('my_main_panel')
+$panel->addsSections(
     new CustomizerSection(
-        'ghwp_language_settings',
-        'Language Settings',
-        'Languages hidden in switcher menu:',
-        [
-            new LanguageSwitcherLanguages(),
-        ]
-    );
+        'my_general_settings',
+        'General Settings',
+        null,
+        [ CompanyInformation::get() ]
+    ),
+    // We could add more sections here if we wanted
+);
+```
+
+
+#### (c) Instance for instance – indirectly via automatic hooks
+
+```php
+use Gebruederheitz\Wordpress\Customizer\CustomizerSection;
+
+$panelId = $panel->getId();
+
+$section = new CustomizerSection(
+    'ghwp_general_settings',
+    'General Settings',
+    null,
+    [ CompanyInformation::get() ]
+);
+
+// We can associate the section with a panel in two ways:
+// Using the actual panel instance directly...
+$section->setPanel($panel);
+// ...or using its ID.
+$section->setPanel($panelId);
+```
+
+In all these examples, we've added our settings right when constructing the 
+sections. If we need some advanced logic, they can be added separately:
+
+```php
+// You can also create a section without any handlers and then add them 
+// later:
+$consentManagementSection = new CustomizerSection(
+    'ghwp_consent_management_settings',
+    'Consent Management'
+);
+
+// Associate with the panel one way...
+$consentManagementSection->setPanel($panel);
+// ...or another
+$panel->addSections($consentManagementSection);
     
-    // You can also create a section without any handlers and then add them 
-    // later:
-    $consentManagementSection = new CustomizerSection(
-        'ghwp_consent_management_settings',
-        'Consent Management'
-    );
-    
-    $consentManagementSection->addSettingsHandler(new ConsentManagement);
-    $consentManagementSection->addSettingsHandlers(
-        [
-            new OtherConsentManagement(),
-            new ExtendedConsentManagement(),
-        ]   
-    );
+// Add hanlders retroactively
+$consentManagementSection->addSettings(ConsentManagementEnabled::get());
+$consentManagementSection->addSettings(
+    OtherConsentManagementSetting::get(),
+    ExtendedConsentManagementSetting::get(),
+);
 
 ```
 
 
-### Defining Settings & Settings Handlers
+### Defining Settings and adding them to a section
 
-First off, you will have to define your settings. Each setting is a class 
-implementing `CustomizerSetting`. You can extend `BasicCustomizerSetting`
-for convenience:
+Now you will have to define your settings. Each setting is a class implementing
+`CustomizerSetting`. You can extend `BasicCustomizerSetting` for convenience:
 
 ```php
 use \Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
 class TelephoneNo extends BasicCustomizerSetting 
 {
-    protected static $key = 'prefix_company_info_telephone';
-    protected static $label = 'Telephone No';
-}
-```
-
-Now you will have to implement a settings handler to register this setting.
-Settings handlers must implement `CustomizerSettingsHandlerInterface`. You can 
-extend `AbstractCustomizerSettingsHandler` for convenience:
-
-```php
-use Gebruederheitz\Wordpress\Customizer\AbstractCustomizerSettingsHandler;
-
-class CompanyInformation extends AbstractCustomizerSettingsHandler
-{
-    /*
-     * Implement getSettings(), returning an array of CustomizerSetting implementations
-     */
-    protected function getSettings(): array
+    // These two methods are abstract in BasicCustomizerSetting, so your IDE 
+    // will conveniently create stubs for you
+    public function getKey(): string
     {
-        return [
-            new TelephoneNo(),
-        ];
+        // A unique key for the option's database entry
+        return 'prefix_company_info_telephone';
+    }
+    
+    public function getLabel(): string
+    {
+        // The input label shown to the user
+        return 'Telephone No';
     }
 }
 ```
+ 
 
-This is the object you're going to pass to the `CustomizerSection`'s constructor,
-as shown above.
+BasicCustomizerSettings are singleton objects, so instead of constructing them
+you retrieve an instance with the static `get()` method:
 
-
-### Settings
-
-You can do more with settings & handlers than the basic example above. Here are
-some more detailed usages:
 
 ```php
-use Gebruederheitz\Wordpress\Customizer\AbstractCustomizerSettingsHandler;
+$section = new CustomizerSection(
+    $slug,
+    $label,
+    $description,
+    [
+        TelephoneNo::get(),
+        /* ... more settings, if you like ... */
+    ]
+);
+
+$section->addSettings(TelephoneNo::get(), OtherSetting::get());
+```
+
+#### Retrieving the value
+
+```php
+# Somewhere in your code, like templates, action handlers, controllers, hook
+# callbacks etc.
+use My\TelephoneNo;
+
+$phoneNumber = TelephoneNo::get()->getValue();
+```
+
+
+
+### Settings: Advanced
+
+You can do more with settings than the basic example above. Here are some more 
+detailed usages:
+
+```php
 use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
 
 /**
- * A setting with an alternative input type and explicit default value
+ * A setting with an alternative input type and explicit default value. This 
+ * example would of course be simpler to implement using the 
+ * CheckboxCustomizerSetting, as described below.
  */
 class ShowAddress extends BasicCustomizerSetting
 {
-    protected static $key = 'prefix_company_info_show_address';
-    protected static $label = 'Show address in footer';
-    // Optional: i18n namespace, defaults to 'ghwp'. This example results in the
-    // label `__('Show address in footer', 'i18n-namespace')`.
-    protected static $labelNamespace = 'i18n-namespace';
+    public function getKey() {
+        return 'prefix_company_info_show_address';
+    }
+    
+    public function getLabel() {
+        return 'Show address in footer';
+    }
+    
     // Optional: default value, defaults to ''
-    protected static $default = false;
+    protected $default = false;
+    
     // Optional: input type
-    protected static $inputType = 'checkbox';
+    protected ?string $inputType = 'checkbox';
 }
 
 /**
@@ -147,9 +231,17 @@ class ShowAddress extends BasicCustomizerSetting
  */
 class StreetAddress extends BasicCustomizerSetting
 {
-    protected static $key = 'prefix_company_info_street_address';
-    protected static $label = 'Street address';
-    protected static $sanitizer = 'sanitize_text_field';
+    public function getKey() {
+        return 'prefix_company_info_street_address';
+    }
+    
+    public function getLabel() {
+        return 'Street address';
+    }
+    
+    // A "callable-string" for a function that will receive the raw value and
+    // return a sanitized value.
+    protected ?string $sanitizer = 'sanitize_text_field';
 }
 
 /**
@@ -157,10 +249,11 @@ class StreetAddress extends BasicCustomizerSetting
  */
 class SupportIcon extends BasicCustomizerSetting
 {
-    protected static $key = 'prefix_company_info_support_icon';
-    protected static $label = 'Support icon to use';
-    protected static $sanitizer = 'sanitize_text_field';
-    protected static $inputType = 'select';
+    /* ... key and label */
+    
+    protected ?string $sanitizer = 'sanitize_text_field';
+    
+    protected ?string $inputType = 'select';
     
     public function getOptions: ?array
     {
@@ -176,51 +269,23 @@ class SupportIcon extends BasicCustomizerSetting
  */
 class ContactPage extends BasicCustomizerSetting
 {
-    protected static $key = 'prefix_company_info_contact_page';
-    protected static $label = 'Contact page';
+    // ... key and label ...
+    
     protected static $inputType = 'dropdown-pages';
    
     public function getActiveCallback() : ?callable
     {
         // Using an anonymous callback 
         return function () {
+            $showAddress = ShowAddress::get();
             return CustomizerSettings::getValue(
-                ShowAddress::getKey(),
-                ShowAddress::getDefault()
+                $showAddress->getKey(),
+                $showAddress->getDefault()
             );
         }
         
         // Using a class method
-        return [ShowAddress::class, 'getValue'] // getValue() has a default implementation in BasicCustomizerSetting
-    }
-}
-
-class CompanyInformation extends AbstractCustomizerSettingsHandler
-{
-    /*
-     * Implement getSettings(), returning an array of CustomizerSetting implementations
-     */
-    protected function getSettings(): array
-    {
-        return [
-            new StreetAddress(),
-            new ShowAddress(),
-            new SupportIcon(),
-            new ContactPage(),
-        ];
-    }
-    
-    /**
-     * Use CustomizerSettings::getValue() to retrieve the stored setting.
-     * Defining a public, static accessor method like this serves to encapsulate
-     * all the logic surrounding the setting inside a handler class.
-     *
-     * This is the same implementation as in BasicCustomizerSetting::getValue(),
-     * so you could also simply use TelephoneNo::getValue() in your templates. 
-     */
-    public static function getTelephoneNo(): string
-    {
-        return TelephoneNo::getValue();
+        return [ShowAddress::get(), 'getValue'] // getValue() has a default implementation in BasicCustomizerSetting
     }
 }
 ```
@@ -233,74 +298,74 @@ at `Gebruederheitz\Wordpress\Customizer\InputTypes`:
 ```php
 class MyCheckbox extends \Gebruederheitz\Wordpress\Customizer\InputTypes\CheckboxCustomizerSetting
 {
-    protected static $key = 'my-checkbox';
-    protected static $label = 'My Checkbox';
+    public function getKey(): string {
+        return 'my-checkbox';
+    }
+    
+    public function getLabel(): string {
+        return 'My Checkbox';
+    }
+    
     /* The values below are already set on CheckboxCustomizerSetting: */
-//    protected static $inputType = 'checkbox';
-//    protected static $default = false;
+    // protected ?string $inputType = 'checkbox';
+    // protected $default = false;
 }
 
 class MyUrlField extends \Gebruederheitz\Wordpress\Customizer\InputTypes\UrlCustomizerSetting
 {
-    protected static $key = 'my-url-field';
-    protected static $label = 'My URL';
+    public function getKey(): string {
+        return 'my-url-field';
+    }
+    
+    public function getLabel(): string {
+        return 'My URL';
+    }
+    
     /* Already set: */
-//    protected static $inputType = 'url';
-//    protected static $sanitizer = 'sanitize_url';
+    // protected ?string $inputType = 'url';
+    // protected ?string $sanitizer = 'sanitize_url';
 }
 
 class MyTextField extends \Gebruederheitz\Wordpress\Customizer\InputTypes\TextCustomizerSetting
 {
-    protected static $key = 'my-text';
-    protected static $label = 'My Text';
+    public function getKey(): string {
+        return 'my-text';
+    }
+        
+    public function getLabel(): string {
+        return 'My Text';
+    }
+    
     /* Already set: */
-//    protected static $sanitizer = 'sanitize_text_field';
+    // protected ?string $sanitizer = 'sanitize_text_field';
 }
-```
-
-
-### Labels / Translations / i18n
-
-All field labels, section names etc. are passed through WP's gettext `__()`.
-By default, the value `ghwp` is used as the second parameter, the translation
-namespace: 
-
-```php
-class SomeField extends BasicCustomizerSetting {
-    protected static $label = 'This is a label';
-}
-
-// Will result in
-$effectiveLabel = __('This is a label', 'ghwp');
-```
-
-You can set a custom namespace by passing a string as the second argument to
-the constructor of `CustomizerSettings`:
-
-```php
-new CustomizerSettings('Base Panel Title', 'my-custom-namespace');
 ```
 
 
 ### Customizing which panels are removed
 
 By default, `CustomizerSettings` "cleans up" the Customizer, removing some
-panels that are rarely used. You can extend the `CustomizerSettings` class and 
-override the `declutterCustomizer()` method to control which of the default 
-panels are removed:
+panels that are rarely used. You can use a filter hook to  control which of the 
+default panels are removed:
 
 ```php
-class MyCustomizerSettings extends \Gebruederheitz\Wordpress\Customizer\CustomizerSettings
-{
-    protected function declutterCustomizer(WP_Customize_Manager $wp_customize)
-    {
-        $wp_customize->remove_panel( 'themes' );
-        $wp_customize->remove_section( 'static_front_page' );
-        $wp_customize->remove_section( 'custom_css' );
-        $wp_customize->remove_control( 'custom_logo' );
-        $wp_customize->remove_control( 'site_icon' );
+use Gebruederheitz\Wordpress\Customizer\CustomizerSettings;
+
+add_filter(
+    CustomizerSettings::HOOK_FILTER_DECLUTTER_ITEMS, 
+    function ($items) {
+        unset($items['panels']['themes']);
+        unset($items['sections']['static_front_page']);
+        unset($items['sections']['custom_css']);
+        unset($items['controls']['custom_logo']);
+        unset($items['controls']['site_icon']);
+        
+        return $items;
+        
+        // To not "declutter" at all simply
+        return [];
     }
-}
+);
 ```
 
 
@@ -318,7 +383,7 @@ class MyCustomSetting implements CustomizerSetting
 {
     /* ... */
     
-    protected static $inputType = MyCustomizeControl::class;
+    protected ?string $inputType = MyCustomizeControl::class;
 }
 ```
 
@@ -334,10 +399,10 @@ use Gebruederheitz\Wordpress\Customizer\InputTypes\SeparatorSetting;
 
 $settings = [
     // A plain horizontal rule with 2em vertical margin
-    new SeparatorSetting('some-unique-id-for-this-separator'),
-    new TelephoneNo(),
+    SeparatorSetting::get()->configure('some-unique-id-for-this-separator'),
+    TelephoneNo::get(),
     // With custom margin of 3em
-    new SeparatorSetting(
+    SeparatorSetting::get()->configure(
         'sep-with-custom-margin',
         null,
         [
@@ -345,12 +410,12 @@ $settings = [
         ]
     ),
     // with a heading in the default color #08d
-    new SeparatorSetting(
+    SeparatorSetting::get()->configure(
         'sep-general-settings',
         __('General Settings', 'namespace')
     ),
     // with heading in a custom color
-    new SeparatorSetting(
+    SeparatorSetting::get()->configure(
         'some-unique-id-for-this-separator',
         'Heading',
         [
@@ -360,7 +425,7 @@ $settings = [
     // with heading in a custom color and custom margin
     // hr bottom margin is calc(${customMargin}em + 2em) to compensate for
     // the heading's margin collapsing
-    new SeparatorSetting(
+    SeparatorSetting::get()->configure(
         'some-unique-id-for-this-separator',
         'Heading'
         [
@@ -376,7 +441,8 @@ $settings = [
 
 ### Dependencies
 
-- PHP >= 7.4
-- [Composer 2.x](https://getcomposer.org)
-- [NVM](https://github.com/nvm-sh/nvm) and nodeJS LTS (v16.x)
+- [asdf](https://asdf-vm.com/guide/getting-started.html) tool version manager
+- nodeJS LTS (v18.x) via asdf
+- PHP >= 7.4 (via asdf)
+- [Composer 2.x](https://getcomposer.org) (via asdf)
 - Nice to have: GNU Make (or drop-in alternative)
