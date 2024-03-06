@@ -2,6 +2,8 @@
 
 namespace Gebruederheitz\Wordpress\Customizer;
 
+use Gebruederheitz\SimpleSingleton\SingletonAble;
+
 /**
  * @deprecated Please read the upgrade guide: You can still use this for
  *             semantic purposes, but all functionality surrounding this class
@@ -9,6 +11,15 @@ namespace Gebruederheitz\Wordpress\Customizer;
  */
 abstract class AbstractCustomizerSettingsHandler
 {
+    public static function factory(): self
+    {
+        return new static();
+    }
+
+    final public function __construct()
+    {
+    }
+
     /** @return array<CustomizerSetting<mixed>> */
     abstract public function getSettings(): array;
 }
