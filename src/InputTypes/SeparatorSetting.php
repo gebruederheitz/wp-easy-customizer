@@ -4,14 +4,25 @@ declare(strict_types=1);
 
 namespace Gebruederheitz\Wordpress\Customizer\InputTypes;
 
-use Gebruederheitz\Wordpress\Customizer\BasicCustomizerSetting;
+use Gebruederheitz\Wordpress\Customizer\CommonCustomizerSetting;
 use Gebruederheitz\Wordpress\Customizer\CustomControl\SeparatorCustomControl;
 
 /**
- * @extends BasicCustomizerSetting<null>
+ * @extends CommonCustomizerSetting<null>
  */
-abstract class SeparatorSetting extends BasicCustomizerSetting
+abstract class SeparatorSetting extends CommonCustomizerSetting
 {
+    /**
+     * @param ?array<string, mixed> $options
+     */
+    public static function factory(
+        string $key,
+        ?string $label = null,
+        ?array $options = null
+    ): self {
+        return new static($key, $label, $options);
+    }
+
     public string $key;
 
     /** @var ?array<string, mixed>  */
@@ -26,11 +37,11 @@ abstract class SeparatorSetting extends BasicCustomizerSetting
     /**
      * @param ?array<string, mixed> $options
      */
-    public function configure(
+    final public function __construct(
         string $key,
         ?string $label = null,
         ?array $options = null
-    ): self {
+    ) {
         $this->key = $key;
 
         if ($label !== null) {
@@ -40,8 +51,6 @@ abstract class SeparatorSetting extends BasicCustomizerSetting
         if ($options !== null) {
             $this->options = $options;
         }
-
-        return $this;
     }
 
     public function getKey(): string

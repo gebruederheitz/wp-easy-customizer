@@ -195,13 +195,14 @@ yourself – that way the gettext parser will know which strings to add to which
 namespace when creating translations.
 
 
-### SeparatorSetting parameters need to be provided differently
+### SeparatorSettings are different from the others
 
-As the `SeparatorSetting` is also a `BasicCustomizerSetting` and therefore is a
-singleton with only a protected constructor, you will need to pass its 
-parameters using the public method `configure()`: 
-`SeparatorSetting::get()->configure('id', __('Label', 'ns'), $options)`.
-
+As the `SeparatorSetting` can not be a singleton, you can use it two ways: Just
+like previously by constructing it, or using the static method `factory()`.
+```php
+new SeparatorSetting('id', __('Label', 'ns'), $options);
+SeparatorSetting::factory('id', __('Label', 'ns'), $options);
+````
 
 
 

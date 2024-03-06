@@ -399,10 +399,10 @@ use Gebruederheitz\Wordpress\Customizer\InputTypes\SeparatorSetting;
 
 $settings = [
     // A plain horizontal rule with 2em vertical margin
-    SeparatorSetting::get()->configure('some-unique-id-for-this-separator'),
+    SeparatorSetting::factory('some-unique-id-for-this-separator'),
     TelephoneNo::get(),
     // With custom margin of 3em
-    SeparatorSetting::get()->configure(
+    SeparatorSetting::factory(
         'sep-with-custom-margin',
         null,
         [
@@ -410,12 +410,12 @@ $settings = [
         ]
     ),
     // with a heading in the default color #08d
-    SeparatorSetting::get()->configure(
+    SeparatorSetting::factory(
         'sep-general-settings',
         __('General Settings', 'namespace')
     ),
     // with heading in a custom color
-    SeparatorSetting::get()->configure(
+    SeparatorSetting::factory(
         'some-unique-id-for-this-separator',
         'Heading',
         [
@@ -425,7 +425,7 @@ $settings = [
     // with heading in a custom color and custom margin
     // hr bottom margin is calc(${customMargin}em + 2em) to compensate for
     // the heading's margin collapsing
-    SeparatorSetting::get()->configure(
+    SeparatorSetting::factory(
         'some-unique-id-for-this-separator',
         'Heading'
         [
