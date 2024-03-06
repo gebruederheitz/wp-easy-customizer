@@ -4,9 +4,102 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce773fbf2eb18f03ba36b89d0940ad6f",
-    "packages": [],
+    "content-hash": "84dde5b328ccc6afa94be1dd9c315657",
+    "packages": [
+        {
+            "name": "gebruederheitz/simple-singleton",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gebruederheitz/simple-singleton.git",
+                "reference": "7633cdbe54ddfb7c551b637e490b0c034681629a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gebruederheitz/simple-singleton/zipball/7633cdbe54ddfb7c551b637e490b0c034681629a",
+                "reference": "7633cdbe54ddfb7c551b637e490b0c034681629a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.4",
+                "szepeviktor/phpstan-wordpress": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gebruederheitz\\SimpleSingleton\\": "Gebruederheitz/SimpleSingleton/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Maros",
+                    "email": "andreas.maros@gebruederheitz.de"
+                }
+            ],
+            "description": "A simple implementation of a singleton as an extensible abstract class or as a trait.",
+            "support": {
+                "issues": "https://github.com/gebruederheitz/simple-singleton/issues",
+                "source": "https://github.com/gebruederheitz/simple-singleton/tree/v1.0.1"
+            },
+            "time": "2022-02-08T19:07:25+00:00"
+        }
+    ],
     "packages-dev": [
+        {
+            "name": "johnpbloch/wordpress-core",
+            "version": "6.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/johnpbloch/wordpress-core.git",
+                "reference": "389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/johnpbloch/wordpress-core/zipball/389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8",
+                "reference": "389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.0.0"
+            },
+            "provide": {
+                "wordpress/core-implementation": "6.4.3"
+            },
+            "type": "wordpress-core",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "WordPress Community",
+                    "homepage": "https://wordpress.org/about/"
+                }
+            ],
+            "description": "WordPress is open source software you can use to create a beautiful website, blog, or app.",
+            "homepage": "https://wordpress.org/",
+            "keywords": [
+                "blog",
+                "cms",
+                "wordpress"
+            ],
+            "support": {
+                "forum": "https://wordpress.org/support/",
+                "irc": "irc://irc.freenode.net/wordpress",
+                "issues": "https://core.trac.wordpress.org/",
+                "source": "https://core.trac.wordpress.org/browser",
+                "wiki": "https://codex.wordpress.org/"
+            },
+            "time": "2024-01-30T19:31:14+00:00"
+        },
         {
             "name": "php-stubs/wordpress-stubs",
             "version": "v6.4.3",
@@ -261,7 +354,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.3|^8.0"
+        "php": "^7.4|^8.0"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
