@@ -1,6 +1,6 @@
 {
   "name": "@gebruederheitz/wp-easy-customizer-util",
-  "version": "3.0.0-beta.8",
+  "version": "3.0.0",
   "description": "Utilities for the gebruederheitz/wp-easy-customizer PHP composer package",
   "main": "",
   "engines": {
