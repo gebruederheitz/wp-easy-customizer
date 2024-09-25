@@ -8,7 +8,7 @@ namespace Gebruederheitz\Wordpress\Customizer;
  */
 class CustomizerSection
 {
-    private string $slug = '';
+    protected string $slug = '';
 
     private string $label = '';
 
