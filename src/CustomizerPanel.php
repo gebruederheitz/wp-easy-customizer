@@ -194,8 +194,8 @@ class CustomizerPanel
         // The sections registered directly with this panel instance do not
         // subscribe to the filter hooks, so their methods are called directly.
         foreach ($this->sections as $section) {
-            $section->onGetSections($fields);
-            $section->onGetFields($fields);
+            $fields = $section->onGetSections($fields);
+            $fields = $section->onGetFields($fields);
         }
 
         $fields = apply_filters(
