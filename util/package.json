@@ -7,7 +7,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "lint": "prettier -c --config ../.prettierrc ../src/",
+    "lint": "prettier -c ../src/",
     "release": "release-it --only-version",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/gebruederheitz/wp-easy-customizer#readme",
   "dependencies": {
-    "@prettier/plugin-php": "^0.18.0",
-    "prettier": "^2.5.1",
-    "release-it": "^14.12.4"
+    "@prettier/plugin-php": "^0.22.4",
+    "prettier": "^3.5.3",
+    "release-it": "^18.1.2"
   }
 }

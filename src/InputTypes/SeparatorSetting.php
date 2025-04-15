@@ -19,7 +19,7 @@ class SeparatorSetting extends CommonCustomizerSetting
     }
 
     /**
-     * @param ?array<string, mixed> $options
+     * @param ?array<string, string> $options
      */
     public static function factory(
         string $key,
@@ -31,7 +31,7 @@ class SeparatorSetting extends CommonCustomizerSetting
 
     public string $key;
 
-    /** @var ?array<string, mixed>  */
+    /** @var ?array<string, string>  */
     protected ?array $options = null;
 
     protected ?string $label = null;
@@ -41,7 +41,7 @@ class SeparatorSetting extends CommonCustomizerSetting
     protected ?string $inputType = SeparatorCustomControl::class;
 
     /**
-     * @param ?array<string, mixed> $options
+     * @param ?array<string, string> $options
      */
     final public function __construct(
         string $key,

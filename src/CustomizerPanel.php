@@ -8,6 +8,11 @@ use WP_Customize_Manager;
 
 /**
  * @phpstan-import-type ValueType from CustomizerSetting
+ * @phpstan-import-type Field from CustomizerSetting
+ * @phpstan-import-type Fields from CustomizerSection
+ * @phpstan-import-type Section from CustomizerSection
+ * @phpstan-import-type SectionsBySectionId from CustomizerSection
+ *
  */
 class CustomizerPanel
 {
@@ -39,11 +44,11 @@ class CustomizerPanel
         }
 
         // Make certain the CustomizerSettings singleton is instantiated in case
-        //it has not been manually instantiated by the user, thus ensuring that
+        // it has not been manually instantiated by the user, thus ensuring that
         // the hook for declutterCustomizer is always attached.
         // It seems like a good place, as every usage of this library will
         // always require at least one panel instance.
-        $settings = CustomizerSettings::getInstance();
+        CustomizerSettings::getInstance();
 
         add_action('customize_register', [$this, 'onCustomizeRegister']);
     }
@@ -99,8 +104,7 @@ class CustomizerPanel
     }
 
     /**
-     * @template T of array<string, string|array>
-     * @param array<string, string|T> $content
+     * @param Section $content
      */
     protected function registerSection(string $key, array $content): void
     {
@@ -181,7 +185,7 @@ class CustomizerPanel
     }
 
     /**
-     * @return array<string, mixed>
+     * @return SectionsBySectionId
      */
     protected function getFields(): array
     {

@@ -3,5 +3,7 @@
     "tabWidth": 4,
     "useTabs": false,
     "phpVersion": "7.4",
-    "trailingCommaPHP": true
+    "trailingCommaPHP": true,
+    "plugins": ["@prettier/plugin-php"],
+    "braceStyle": "per-cs"
 }

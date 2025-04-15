@@ -21,10 +21,8 @@ abstract class AbstractCustomizerSettingsHandler
         $this->init();
     }
 
-    protected function init(): void
-    {
-    }
+    protected function init(): void {}
 
-    /** @return array<CustomizerSetting<mixed>> */
+    /** @return array<CustomizerSetting> */
     abstract public function getSettings(): array;
 }

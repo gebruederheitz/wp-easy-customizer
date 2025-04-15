@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Gebruederheitz\Wordpress\Customizer;
 
 /**
+ * @phpstan-type Field array{label: string, type: string, default: ValueType, sanitize?: callable, active_callback?: callable, options?: array<string, string>}
  * @phpstan-type ValueType string|array|bool|int|mixed
- * @phpstan-template V of string|array|bool|int|mixed
+ * @phpstan-template V of string|array|bool|int|mixed = string|array|bool|int|mixed
  */
 interface CustomizerSetting
 {
@@ -25,12 +26,12 @@ interface CustomizerSetting
 
     public function getSanitizer(): ?callable;
 
-    /** @return array<mixed> */
+    /** @return array<string, string> */
     public function getOptions(): ?array;
 
     public function getActiveCallback(): ?callable;
 
-    /** @return array<string, mixed> */
+    /** @return Field */
     public function getConfig(): array;
 
     /** @return V */

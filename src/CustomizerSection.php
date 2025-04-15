@@ -4,7 +4,11 @@ namespace Gebruederheitz\Wordpress\Customizer;
 
 /**
  * @phpstan-import-type ValueType from CustomizerSetting
- * @phpstan-type Sections array<string, array<string, mixed>>
+ * @phpstan-import-type Field from CustomizerSetting
+ *
+ * @phpstan-type Fields array<string, Field>
+ * @phpstan-type Section array{label: string, content: Fields, description: string}
+ * @phpstan-type SectionsBySectionId array<string, Section>
  */
 class CustomizerSection
 {
@@ -78,8 +82,8 @@ class CustomizerSection
     }
 
     /**
-     * @param Sections $sections
-     * @return Sections
+     * @param SectionsBySectionId $sections
+     * @return SectionsBySectionId
      */
     public function onGetSections(array $sections): array
     {
@@ -93,8 +97,8 @@ class CustomizerSection
     }
 
     /**
-     * @param Sections $sections
-     * @return Sections
+     * @param SectionsBySectionId $sections
+     * @return SectionsBySectionId
      */
     public function onGetFields(array $sections): array
     {
@@ -114,12 +118,12 @@ class CustomizerSection
     }
 
     /**
-     * @param Sections $fields
+     * @param SectionsBySectionId $sections
      */
-    public function registerSettings(array &$fields): void
+    public function registerSettings(array &$sections): void
     {
         foreach ($this->settings as $setting) {
-            $fields[$this->slug]['content'][
+            $sections[$this->slug]['content'][
                 $setting->getKey()
             ] = $setting->getConfig();
         }
