@@ -4,11 +4,6 @@ namespace Gebruederheitz\Wordpress\Customizer;
 
 /**
  * @phpstan-import-type ValueType from CustomizerSetting
- * @phpstan-import-type Field from CustomizerSetting
- *
- * @phpstan-type Fields array<string, Field>
- * @phpstan-type Section array{label: string, content: Fields, description: string}
- * @phpstan-type SectionsBySectionId array<string, Section>
  */
 class CustomizerSection
 {
@@ -71,40 +66,41 @@ class CustomizerSection
                 $this,
                 'onGetSections',
             ]);
-
-            add_filter(CustomizerPanel::HOOK_GET_FIELDS . $panelId, [
-                $this,
-                'onGetFields',
-            ]);
         }
 
         return $this;
     }
 
-    /**
-     * @param SectionsBySectionId $sections
-     * @return SectionsBySectionId
-     */
-    public function onGetSections(array $sections): array
+    public function getSlug(): string
     {
-        $sections[$this->slug] = [
-            'label' => $this->label,
-            'content' => [],
-            'description' => $this->description,
-        ];
+        return $this->slug;
+    }
 
-        return $sections;
+    public function getLabel(): string
+    {
+        return $this->label ?? '';
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description ?? '';
     }
 
     /**
-     * @param SectionsBySectionId $sections
-     * @return SectionsBySectionId
+     * @return CustomizerSetting[]
      */
-    public function onGetFields(array $sections): array
+    public function getSettings(): array
     {
-        $this->registerSettings($sections);
+        return $this->settings;
+    }
 
-        return $sections;
+    /**
+     * @param CustomizerSection[] $sections
+     * @return CustomizerSection[]
+     */
+    public function onGetSections(array $sections): array
+    {
+        return array_merge($sections, [$this]);
     }
 
     /**
@@ -115,17 +111,5 @@ class CustomizerSection
         array_push($this->settings, ...$settings);
 
         return $this;
-    }
-
-    /**
-     * @param SectionsBySectionId $sections
-     */
-    public function registerSettings(array &$sections): void
-    {
-        foreach ($this->settings as $setting) {
-            $sections[$this->slug]['content'][
-                $setting->getKey()
-            ] = $setting->getConfig();
-        }
     }
 }

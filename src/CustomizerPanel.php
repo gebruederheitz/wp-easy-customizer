@@ -8,19 +8,10 @@ use WP_Customize_Manager;
 
 /**
  * @phpstan-import-type ValueType from CustomizerSetting
- * @phpstan-import-type Field from CustomizerSetting
- * @phpstan-import-type Fields from CustomizerSection
- * @phpstan-import-type Section from CustomizerSection
- * @phpstan-import-type SectionsBySectionId from CustomizerSection
  *
  */
 class CustomizerPanel
 {
-    /**
-     * @hook Filter hook called with an array of customizer fields
-     */
-    public const HOOK_GET_FIELDS = 'ghwp_customizer_get_fields_';
-
     /**
      * @hook Filter hook called with an array of customizer sections
      */
@@ -90,124 +81,81 @@ class CustomizerPanel
     public function onCustomizeRegister(
         WP_Customize_Manager $wp_customize
     ): void {
-        $this->customizerManager = $wp_customize;
-
-        $fields = $this->getFields();
-
-        $this->customizerManager->add_panel($this->panelId, [
+        $customizerManager = $wp_customize;
+        $customizerManager->add_panel($this->panelId, [
             'title' => $this->title,
         ]);
 
-        foreach ($fields as $section_key => $section_content) {
-            $this->registerSection($section_key, $section_content);
+        $sections = apply_filters(
+            static::HOOK_GET_SECTIONS . $this->panelId,
+            $this->sections,
+        );
+
+        foreach ($sections as $section) {
+            $this->registerSection($customizerManager, $section);
         }
     }
 
-    /**
-     * @param Section $content
-     */
-    protected function registerSection(string $key, array $content): void
-    {
-        $title = is_string($content['label']) ? $content['label'] : '';
-        $description =
-            isset($content['description']) && is_string($content['description'])
-                ? $content['description']
-                : '';
-
+    protected function registerSection(
+        WP_Customize_Manager $customizerManager,
+        CustomizerSection $section
+    ): void {
         if ($this->customizerManager) {
-            $this->customizerManager->add_section($key, [
+            $this->customizerManager->add_section($section->getSlug(), [
                 'priority' => 500,
                 'theme_supports' => '',
-                'title' => $title,
+                'title' => $section->getLabel(),
                 'panel' => $this->panelId,
-                'description' => $description,
+                'description' => $section->getDescription(),
             ]);
 
-            if (is_array($content['content'])) {
-                foreach ($content['content'] as $controlKey => $value) {
-                    $this->registerControl($controlKey, $value, $key);
-                }
+            foreach ($section->getSettings() as $setting) {
+                $this->registerControl($setting, $section, $customizerManager);
             }
         }
     }
 
-    /**
-     * @param ValueType $value
-     */
     protected function registerControl(
-        string $key,
-        $value,
-        string $section
+        CustomizerSetting $setting,
+        CustomizerSection $section,
+        WP_Customize_Manager $customizerManager
     ): void {
-        if (!$this->customizerManager) {
-            return;
-        }
-
-        $this->customizerManager->add_setting($key, [
-            'default' => is_array($value) ? $value['default'] ?? '' : '',
+        // @phpstan-ignore-next-line (default can be a boolean or an array)
+        $customizerManager->add_setting($setting->getKey(), [
+            'default' => $setting->getDefault() ?: '',
             'type' => 'theme_mod',
         ]);
 
-        $type = is_array($value) ? ($value['type'] ?: 'text') : 'text';
+        $type = $setting->getInputType() ?: 'text';
         $controlComponentClass = $this->getControlClass($type);
 
         $componentOptions = [
-            'label' => is_array($value) ? $value['label'] : $value,
-            'section' => $section,
-            'settings' => $key,
-            'active_callback' => is_array($value)
-                ? $value['active_callback'] ?? null
-                : null,
+            'label' => $setting->getLabel() ?: '',
+            'section' => $section->getSlug(),
+            'settings' => $setting->getKey(),
+            'active_callback' => $setting->getActiveCallback() ?: null,
         ];
 
-        if ($type === 'media') {
-            $componentOptions['mime_type'] = is_array($value)
-                ? $value['mime_type'] ?? null
-                : null;
+        if (
+            $type === 'media' &&
+            is_a($setting, MediaCustomizerSetting::class, false)
+        ) {
+            $componentOptions['mime_type'] = $setting->getMimeType();
         } else {
             $componentOptions['type'] = $type;
-            $componentOptions['sanitize_callback'] = is_array($value)
-                ? $value['sanitize'] ?? null
-                : null;
-            $componentOptions['choices'] = is_array($value)
-                ? $value['options'] ?? null
-                : null;
+            $componentOptions['sanitize_callback'] =
+                $setting->getSanitizer() ?: null;
+            $componentOptions['choices'] = $setting->getOptions() ?: null;
         }
 
         /** @var WP_Customize_Control $controlComponent */
         $controlComponent = new $controlComponentClass(
-            $this->customizerManager,
-            $key . '_control',
+            $customizerManager,
+            $setting->getKey() . '_control',
             $componentOptions,
         );
 
-        $this->customizerManager->add_control($controlComponent);
-    }
-
-    /**
-     * @return SectionsBySectionId
-     */
-    protected function getFields(): array
-    {
-        $fields = [];
-
-        // The sections registered directly with this panel instance do not
-        // subscribe to the filter hooks, so their methods are called directly.
-        foreach ($this->sections as $section) {
-            $fields = $section->onGetSections($fields);
-            $fields = $section->onGetFields($fields);
-        }
-
-        $fields = apply_filters(
-            static::HOOK_GET_SECTIONS . $this->panelId,
-            $fields,
-        );
-        $fields = apply_filters(
-            static::HOOK_GET_FIELDS . $this->panelId,
-            $fields,
-        );
-
-        return $fields;
+        $customizerManager->add_control($controlComponent);
     }
 
     /**

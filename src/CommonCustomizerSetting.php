@@ -52,30 +52,6 @@ abstract class CommonCustomizerSetting implements CustomizerSetting
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    public function getConfig(): array
-    {
-        $result = [
-            'label' => $this->getLabel(),
-            'type' => $this->getInputType(),
-            'default' => $this->getDefault(),
-        ];
-
-        if ($this->getSanitizer() !== null) {
-            $result['sanitize'] = $this->getSanitizer();
-        }
-        if ($this->getActiveCallback() !== null) {
-            $result['active_callback'] = $this->getActiveCallback();
-        }
-        if ($this->getOptions() !== null) {
-            $result['options'] = $this->getOptions();
-        }
-
-        return $result;
-    }
-
-    /**
      * @return ValueType
      */
     public function getValue()
