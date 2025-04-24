@@ -21,7 +21,6 @@ class CustomizerPanel
 
     protected string $panelId;
     protected string $title = 'Theme Settings';
-    protected ?WP_Customize_Manager $customizerManager = null;
 
     /** @var array<CustomizerSection> */
     protected array $sections = [];
@@ -100,18 +99,16 @@ class CustomizerPanel
         WP_Customize_Manager $customizerManager,
         CustomizerSection $section
     ): void {
-        if ($this->customizerManager) {
-            $this->customizerManager->add_section($section->getSlug(), [
-                'priority' => 500,
-                'theme_supports' => '',
-                'title' => $section->getLabel(),
-                'panel' => $this->panelId,
-                'description' => $section->getDescription(),
-            ]);
+        $customizerManager->add_section($section->getSlug(), [
+            'priority' => 500,
+            'theme_supports' => '',
+            'title' => $section->getLabel(),
+            'panel' => $this->panelId,
+            'description' => $section->getDescription(),
+        ]);
 
-            foreach ($section->getSettings() as $setting) {
-                $this->registerControl($setting, $section, $customizerManager);
-            }
+        foreach ($section->getSettings() as $setting) {
+            $this->registerControl($setting, $section, $customizerManager);
         }
     }
 
