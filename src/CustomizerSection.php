@@ -16,6 +16,8 @@ class CustomizerSection
     /** @var array<CustomizerSetting<ValueType>> $settings */
     private array $settings = [];
 
+    private int $priority = 10;
+
     /**
      * @param ?array<CustomizerSetting<ValueType>> $settings
      */
@@ -49,6 +51,11 @@ class CustomizerSection
         }
     }
 
+    public function setPriority(int $priority): void
+    {
+        $this->priority = $priority;
+    }
+
     /**
      * @param CustomizerPanel|string $panel
      */
@@ -62,10 +69,11 @@ class CustomizerSection
         }
 
         if ($panelId) {
-            add_filter(CustomizerPanel::HOOK_GET_SECTIONS . $panelId, [
-                $this,
-                'onGetSections',
-            ]);
+            add_filter(
+                CustomizerPanel::HOOK_GET_SECTIONS . $panelId,
+                [$this, 'onGetSections'],
+                $this->priority,
+            );
         }
 
         return $this;
