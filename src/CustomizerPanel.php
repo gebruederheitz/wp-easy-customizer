@@ -22,9 +22,6 @@ class CustomizerPanel
     protected string $panelId;
     protected string $title = 'Theme Settings';
 
-    /** @var array<CustomizerSection> */
-    protected array $sections = [];
-
     public function __construct(string $id, ?string $title = null)
     {
         $this->panelId = self::PANEL_ID_PREFIX . sanitize_key($id);
@@ -67,7 +64,9 @@ class CustomizerPanel
 
     public function addSections(CustomizerSection ...$sections): self
     {
-        array_push($this->sections, ...$sections);
+        foreach ($sections as $section) {
+            $section->setPanel($this);
+        }
 
         return $this;
     }
@@ -85,9 +84,10 @@ class CustomizerPanel
             'title' => $this->title,
         ]);
 
+        /** @var array<CustomizerSection> $sections */
         $sections = apply_filters(
             static::HOOK_GET_SECTIONS . $this->panelId,
-            $this->sections,
+            [],
         );
 
         foreach ($sections as $section) {
