@@ -24,8 +24,8 @@ class CustomizerSection
     public static function factory(
         string $slug,
         string $label,
-        string $description = null,
-        array $settings = null
+        ?string $description = null,
+        ?array $settings = null
     ): CustomizerSection {
         return new static($slug, $label, $description, $settings);
     }
@@ -36,8 +36,8 @@ class CustomizerSection
     final public function __construct(
         string $slug,
         string $label,
-        string $description = null,
-        array $settings = null
+        ?string $description = null,
+        ?array $settings = null
     ) {
         $this->slug = $slug;
         $this->label = $label;

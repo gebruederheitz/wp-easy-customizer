@@ -49,8 +49,8 @@ class CustomizerPanel
     public function addNewSection(
         string $slug,
         string $label,
-        string $description = null,
-        array $settings = null
+        ?string $description = null,
+        ?array $settings = null
     ): self {
         CustomizerSection::factory(
             $slug,
@@ -84,11 +84,11 @@ class CustomizerPanel
             'title' => $this->title,
         ]);
 
+        $hookName = static::HOOK_GET_SECTIONS . $this->panelId;
+        assert($hookName !== '');
+
         /** @var array<CustomizerSection> $sections */
-        $sections = apply_filters(
-            static::HOOK_GET_SECTIONS . $this->panelId,
-            [],
-        );
+        $sections = apply_filters($hookName, []);
 
         foreach ($sections as $section) {
             $this->registerSection($customizerManager, $section);

@@ -1,5 +1,10 @@
 # Upgrading
 
+## From 3.x to 4.0
+
+Support for PHP 7 has been dropped. The minimum supported PHP version is now
+PHP 8.0.
+
 ## From 2.x to 3.0
 
 Support for PHP 7.3 has been removed.

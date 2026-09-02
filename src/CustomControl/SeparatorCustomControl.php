@@ -11,15 +11,15 @@ class SeparatorCustomControl extends WP_Customize_Control
         $margin = $this->choices['margin'] ?? 2;
         $color = $this->choices['color'] ?? '#08d';
 
-        $hrStyle = "margin: ${margin}em 0";
+        $hrStyle = "margin: {$margin}em 0";
         if (!empty($this->label)) {
-            $hrStyle .= " calc(${margin}em + 2em) 0;";
+            $hrStyle .= " calc({$margin}em + 2em) 0;";
         }
 
         echo "<hr style='$hrStyle'>";
 
         if (!empty($this->label)) {
-            echo "<h2 style='font-variant: small-caps; text-align: center; font-size: 1.75em; color: ${color};'>$this->label</h2>";
+            echo "<h2 style='font-variant: small-caps; text-align: center; font-size: 1.75em; color: {$color};'>$this->label</h2>";
         }
     }
 }

@@ -445,6 +445,6 @@ $settings = [
 
 - [asdf](https://asdf-vm.com/guide/getting-started.html) tool version manager
 - nodeJS LTS (v18.x) via asdf
-- PHP >= 7.4 (via asdf)
+- PHP >= 8.0 (via asdf)
 - [Composer 2.x](https://getcomposer.org) (via asdf)
 - Nice to have: GNU Make (or drop-in alternative)
